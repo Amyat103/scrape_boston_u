@@ -4,8 +4,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-link = os.getenv('BU_LINK')
-print(link)
+# link = os.getenv('BU_LINK')
+# print(link)
+# catalog = os.getenv('COURSE_CATALOG')
 
-r = requests.get(link)
-print(r)
+course_link = os.getenv("COURSE_LINK")
+
+# r = requests.get(link)
+# print(r)
+
+r = requests.get(course_link)
+soup = BeautifulSoup(r.content, 'lxml')
+# print(response)
