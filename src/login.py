@@ -9,34 +9,36 @@ import os
 import time
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
 from dotenv import load_dotenv
 
 load_dotenv()
 
-options = Options()
+# options = Options()
 
-options.add_argument("--window-size=1920,1080")
+# options.add_argument("--window-size=1920,1080")
 
-options.add_experimental_option("detach", True)
+# options.add_experimental_option("detach", True)
 
-driver = webdriver.Chrome(options=options)
-driver.get("https://www.youtube.com/")
-
-
+# driver = webdriver.Chrome(options=options)
+# driver.get("https://www.youtube.com/")
 
 
 
-# test login
-
-my_username = os.getenv('USERNAME')
-my_password = os.getenv('PASSWORD')
 
 class Browser:
-    browser, service, None, None
+    # browser, service = None, None
 
-    def __init__(self, driver):
-        self.service = Service(driver)
-        self.browser = webdriver.Chrome(service=self.service)
+    def __init__(self):
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        driver_path = os.path.join(dir_path, 'chromedriver')
+
+        options = Options()
+        options.add_argument("--window-size=1920,1080")
+        options.add_experimental_option("detach", True)
+
+        self.service = Service(executable_path=driver_path)
+        self.browser = webdriver.Chrome(service=self.service, options=options)
 
     def openpage(self, url):
         self.browser.get(url)
@@ -61,21 +63,25 @@ class Browser:
 
 
 if __name__ == "__main__":
-    browser = Browser('chromedriver')
+    browser = Browser()
 
     base_url = os.getenv("BASE_URL")
-    # test 101
     course_id = "102484"
     term = "2248"
     crse_offer_nbr = "1"
 
     course_url = base_url.format(course_id=course_id, term=term, crse_offer_nbr=crse_offer_nbr)
 
-    browser.open_page(course_url)
+    browser.openpage(course_url)
+    print(course_url)
     time.sleep(3)
 
+    my_username = os.getenv('USERNAME')
+    my_password = os.getenv('PASSWORD')
     browser.login_bu(my_username, my_password)
+    time.sleep(5)
 
+    browser.close_browser()
     
 
 
