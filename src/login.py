@@ -10,6 +10,8 @@ import time
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -56,6 +58,15 @@ class Browser:
         button.click()
         time.sleep(2)
 
+    def click_remember(self):
+        try:
+            remember_button = WebDriverWait(self.browser, 30).until(
+                EC.presence_of_element_located((By.ID, "trust-browser-button"))
+            )
+            remember_button.click()
+        except Exception as e:
+            print(f"{e}")
+
     def login_bu(self, username, password):
         self.add_input(by=By.ID, value="j_username", text=username)
         self.add_input(by=By.ID, value="j_password", text=password)
@@ -79,8 +90,11 @@ if __name__ == "__main__":
     my_username = os.getenv('USERNAME')
     my_password = os.getenv('PASSWORD')
     browser.login_bu(my_username, my_password)
-    time.sleep(5)
+    time.sleep(10)
 
+    browser.click_remember()
+
+    time.sleep(10)
     browser.close_browser()
     
 
