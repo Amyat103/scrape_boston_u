@@ -26,7 +26,6 @@ load_dotenv()
 # driver.get("https://www.youtube.com/")
 
 class Browser:
-    # browser, service = None, None
 
     def __init__(self):
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -73,6 +72,7 @@ class Browser:
 def main():
     browser = Browser()
 
+    # TEST URL
     base_url = os.getenv("BASE_URL")
     course_id = "102484"
     term = "2248"
