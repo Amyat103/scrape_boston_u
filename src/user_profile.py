@@ -8,7 +8,8 @@ load_dotenv()
 
 def create_driver():
     options = Options()
-    options.add_argument(f"user-data-dir={os.getenv("USER_PROFILE")}")
+    print(os.getenv("USER_PROFILE"))
+    options.add_argument(f"user-data-dir={os.getenv('USER_PROFILE')}")
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
     driver_path = os.path.join(dir_path, 'chromedriver')

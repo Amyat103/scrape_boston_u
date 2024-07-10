@@ -42,6 +42,8 @@ class Browser:
 
     def openpage(self, url):
         self.browser.get(url)
+        WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+
 
     def close_browser(self):
         self.browser.close()
@@ -59,27 +61,53 @@ class Browser:
     def click_remember(self):
         try:
             remember_button = WebDriverWait(self.browser, 30).until(
-                EC.presence_of_element_located((By.ID, "trust-browser-button"))
+                EC.presence_of_element_located((By.ID, "j_username"))
             )
             remember_button.click()
         except Exception as e:
             print(f"{e}")
 
+    def check_need_login(self):
+        try:
+            self.browser.find_element(By.ID, "logged_in_element_id")
+            print("Already logged in.")
+            return True
+        except NoSuchElementException:
+            return False
+
     def login_bu(self, username, password):
+        if self.check_need_login():
+            print("No need to login.")
+            return
+        
         try:
             username_field = self.browser.find_element(By.ID, "j_username")
             password_field = self.browser.find_element(By.ID, "j_password")
 
             username_field.send_keys(username)
             password_field.send_keys(password)
+
             self.browser.find_element(By.CLASS_NAME, "input-submit").click()
 
             self.wait_for_auth()
 
             self.click_remember_device()
 
+            WebDriverWait(self.browser, 10).until(
+            EC.presence_of_element_located((By.ID, "element_after_login"))
+            )
+            print("Logged in successfully.")
+
+            self.click_remember()
+
+        except TimeoutException as e:
+            print("Timeout while waiting for login elements: ", e)
+            print("Page source:", self.browser.page_source[:2000])  # print first 2000 characters of the page source
+        except NoSuchElementException as e:
+            print("Element not found on the page: ", e)
+            print("Page source:", self.browser.page_source[:2000])  # print first 2000 characters of the page source
         except Exception as e:
-            print(f"{e}")
+            print("An error occurred during login: ", e)
     
     def wait_for_auth(self):
         try:

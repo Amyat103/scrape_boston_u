@@ -11,6 +11,7 @@ load_dotenv()
 
 def test_link(driver):
     test_link = os.getenv("TEST_LINK")
+    
     driver.get(test_link)
 
     old_data = driver.find_element(By.TAG_NAME, "body").text
