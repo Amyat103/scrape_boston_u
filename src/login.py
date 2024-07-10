@@ -67,8 +67,8 @@ class Browser:
 
     def click_remember(self):
         try:
-            remember_button = WebDriverWait(self.browser, 30).until(
-                EC.presence_of_element_located((By.ID, "j_username"))
+            remember_button = WebDriverWait(self.browser, 10).until(
+                EC.presence_of_element_located((By.ID, "trust-browser-button"))
             )
             remember_button.click()
         except Exception as e:
@@ -103,7 +103,7 @@ class Browser:
                     EC.presence_of_element_located((By.ID, "auth-view-wrapper"))
                 )
                 print("push duo manually now")
-                WebDriverWait(self.browser, 120).until(
+                WebDriverWait(self.browser, 20).until(
                     EC.presence_of_element_located((By.ID, "trust-browser-button"))
                 )
                 self.click_remember()

@@ -26,11 +26,13 @@ def main():
     browser = login.Browser(driver)
 
     # login.py
-    browser.openpage(os.getenv("TEST_LINK"))
+    # browser.openpage(os.getenv("TEST_LINK"))
+    url_to_access = os.getenv("TEST_LINK")
 
-    browser.login_bu(os.getenv('USERNAME'), os.getenv('PASSWORD'))
+    browser.login_bu(url_to_access ,os.getenv('USERNAME'), os.getenv('PASSWORD'))
 
-    test_link(driver)
+    # get data
+    data = test_link(driver)
 
     # close after
     driver.quit()
