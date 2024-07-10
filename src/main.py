@@ -11,7 +11,7 @@ load_dotenv()
 
 def test_link(driver):
     test_link = os.getenv("TEST_LINK")
-    
+
     driver.get(test_link)
 
     old_data = driver.find_element(By.TAG_NAME, "body").text
@@ -26,8 +26,10 @@ def main():
     browser = login.Browser(driver)
 
     # login.py
-    browser.login_bu(os.getenv('USERNAME'), os.getenv('PASSWORD'))
     browser.openpage(os.getenv("TEST_LINK"))
+
+    browser.login_bu(os.getenv('USERNAME'), os.getenv('PASSWORD'))
+
     test_link(driver)
 
     # close after

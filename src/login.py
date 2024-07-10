@@ -41,9 +41,16 @@ class Browser:
             self.browser = webdriver.Chrome(service=self.service, options=options)
 
     def openpage(self, url):
+        print(url)
         self.browser.get(url)
-        WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-
+        try:
+            WebDriverWait(self.browser, 10).until(
+                EC.presence_of_element_located((By.TAG_NAME, "body"))
+            )
+        except TimeoutException:
+            print("Failed to load the login page. Current URL:", self.browser.current_url)
+        
+        return self.browser.current_url
 
     def close_browser(self):
         self.browser.close()
@@ -69,45 +76,47 @@ class Browser:
 
     def check_need_login(self):
         try:
-            self.browser.find_element(By.ID, "logged_in_element_id")
-            print("Already logged in.")
+            self.browser.find_element(By.ID, "j_username")
+            print("Needs to login")
             return True
         except NoSuchElementException:
             return False
 
-    def login_bu(self, username, password):
+    def login_bu(self, url, username, password):
+
+        access_url = self.openpage(url)
+
         if self.check_need_login():
-            print("No need to login.")
-            return
-        
-        try:
+            print(self.browser.current_url)
+            # find html field
             username_field = self.browser.find_element(By.ID, "j_username")
             password_field = self.browser.find_element(By.ID, "j_password")
 
+            # enter username and pass
             username_field.send_keys(username)
             password_field.send_keys(password)
 
             self.browser.find_element(By.CLASS_NAME, "input-submit").click()
 
-            self.wait_for_auth()
+            try:
+                WebDriverWait(self.browser, 10).until(
+                    EC.presence_of_element_located((By.ID, "auth-view-wrapper"))
+                )
+                print("push duo manually now")
+                WebDriverWait(self.browser, 120).until(
+                    EC.presence_of_element_located((By.ID, "trust-browser-button"))
+                )
+                self.click_remember()
+            except TimeoutException:
+                print("No duo needed, logged in")
+            
+        else:
+            print("didn't need login")
+        
+        return access_url
 
-            self.click_remember_device()
+            
 
-            WebDriverWait(self.browser, 10).until(
-            EC.presence_of_element_located((By.ID, "element_after_login"))
-            )
-            print("Logged in successfully.")
-
-            self.click_remember()
-
-        except TimeoutException as e:
-            print("Timeout while waiting for login elements: ", e)
-            print("Page source:", self.browser.page_source[:2000])  # print first 2000 characters of the page source
-        except NoSuchElementException as e:
-            print("Element not found on the page: ", e)
-            print("Page source:", self.browser.page_source[:2000])  # print first 2000 characters of the page source
-        except Exception as e:
-            print("An error occurred during login: ", e)
     
     def wait_for_auth(self):
         try:
@@ -141,6 +150,8 @@ class Browser:
     #         print("Already logged in or no login needed.")
 
 
+
+# ONLY FOR TESTING BROWSER CLASS
 def perform_login():
     browser = Browser()
 
