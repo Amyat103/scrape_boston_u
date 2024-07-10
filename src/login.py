@@ -12,6 +12,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -26,17 +27,18 @@ load_dotenv()
 # driver.get("https://www.youtube.com/")
 
 class Browser:
+    def __init__(self, driver=None):
+        if driver is not None:
+            self.browser = driver
+        else:
+            dir_path = os.path.dirname(os.path.realpath(__file__))
+            driver_path = os.path.join(dir_path, 'chromedriver')
 
-    def __init__(self):
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        driver_path = os.path.join(dir_path, 'chromedriver')
+            options = Options()
+            options.add_experimental_option("detach", True)
 
-        options = Options()
-        options.add_argument("--window-size=1920,1080")
-        options.add_experimental_option("detach", True)
-
-        self.service = Service(executable_path=driver_path)
-        self.browser = webdriver.Chrome(service=self.service, options=options)
+            self.service = Service(executable_path=driver_path)
+            self.browser = webdriver.Chrome(service=self.service, options=options)
 
     def openpage(self, url):
         self.browser.get(url)
@@ -64,12 +66,54 @@ class Browser:
             print(f"{e}")
 
     def login_bu(self, username, password):
-        self.add_input(by=By.ID, value="j_username", text=username)
-        self.add_input(by=By.ID, value="j_password", text=password)
-        self.click_button(by=By.CLASS_NAME, value="input-submit")
+        try:
+            username_field = self.browser.find_element(By.ID, "j_username")
+            password_field = self.browser.find_element(By.ID, "j_password")
+
+            username_field.send_keys(username)
+            password_field.send_keys(password)
+            self.browser.find_element(By.CLASS_NAME, "input-submit").click()
+
+            self.wait_for_auth()
+
+            self.click_remember_device()
+
+        except Exception as e:
+            print(f"{e}")
+    
+    def wait_for_auth(self):
+        try:
+            WebDriverWait(self.browser, 100).until(
+                EC.presence_of_all_elements_located((By.ID, "post_login_element"))
+            )
+            print("login success")
+        except:
+            print("Auth error, duo manual step")
+    # def login_if_required(self):
+    #     try:
+    #         username_field = self.browser.find_element(By.ID, "j_username")
+    #         password_field = self.browser.find_element(By.ID, "j_password")
+    #         username_field.send_keys(os.getenv('USERNAME'))
+    #         password_field.send_keys(os.getenv('PASSWORD'))
+    #         login_button = self.browser.find_element(By.CLASS_NAME, "input-submit")
+    #         login_button.click()
+
+    #         WebDriverWait(self.browser, 10).until(
+    #             EC.presence_of_element_located((By.ID, "duo_iframe"))
+    #         )
+
+    #         try:
+    #             remember_button = WebDriverWait(self.browser, 5).until(
+    #                 EC.element_to_be_clickable((By.ID, "trust-browser-button"))
+    #             )
+    #             remember_button.click()
+    #         except TimeoutException:
+    #             print("No 'Remember Device' button found.")
+    #     except NoSuchElementException:
+    #         print("Already logged in or no login needed.")
 
 
-def main():
+def perform_login():
     browser = Browser()
 
     # TEST URL
@@ -93,10 +137,6 @@ def main():
 
     time.sleep(10)
     browser.close_browser()
-
-
-if __name__ == "__main__":
-    main()
 
 
 
