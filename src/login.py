@@ -25,9 +25,6 @@ load_dotenv()
 # driver = webdriver.Chrome(options=options)
 # driver.get("https://www.youtube.com/")
 
-
-
-
 class Browser:
     # browser, service = None, None
 
@@ -73,7 +70,7 @@ class Browser:
         self.click_button(by=By.CLASS_NAME, value="input-submit")
 
 
-if __name__ == "__main__":
+def main():
     browser = Browser()
 
     base_url = os.getenv("BASE_URL")
@@ -96,7 +93,10 @@ if __name__ == "__main__":
 
     time.sleep(10)
     browser.close_browser()
-    
+
+
+if __name__ == "__main__":
+    main()
 
 
 
