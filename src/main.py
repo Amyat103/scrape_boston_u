@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 import login
 import user_profile
 import json
+from scraper import Scraper
 
 load_dotenv()
 
