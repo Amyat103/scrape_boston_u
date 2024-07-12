@@ -140,15 +140,13 @@ if __name__ == "__main__":
     data = test_cascs()
     combined_data.extend(data)
 
-    # Print all collected data
-    print(json.dumps(combined_data, indent=4))
+    with open("/Users/david/repos/scrape_boston_u/src/test.json", 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
 
     # main file
     # load_dotenv()
     # combined_data = main()
     # print(json.dumps(combined_data, indent=4))
-
-
 
 
 
