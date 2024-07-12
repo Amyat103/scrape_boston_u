@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine, Column, Integer, String, Time, ForeignKey, Boolean, Text
-from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from sqlalchemy.engine import URL
 import os
 from dotenv import load_dotenv
@@ -15,7 +14,8 @@ class Course(Base):
     term = Column(String(20))
     major = Column(String(50))
     course_number = Column(String(10))
-    course_name = Column(String(100))
+    short_title = Column(String(50))
+    full_title = Column(String(100))
     description = Column(Text)
     has_details = Column(Boolean, default=False)
     is_registerable = Column(Boolean, default=False)
@@ -51,3 +51,5 @@ database_url = URL.create(
 
 engine = create_engine(database_url)
 Base.metadata.create_all(engine)
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
