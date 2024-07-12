@@ -1,5 +1,5 @@
-from sqlalchemy import create_engine, Column, Integer, String, Time
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import create_engine, Column, Integer, String, Time, ForeignKey, Boolean, Text
+from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine import URL
 import os
@@ -10,23 +10,35 @@ load_dotenv()
 Base = declarative_base()
 
 class Course(Base):
-    __tablename__ = 'course'
+    __tablename__ = 'courses'
     id = Column(Integer, primary_key=True)
     term = Column(String(20))
     major = Column(String(50))
     course_number = Column(String(10))
     course_name = Column(String(100))
+    description = Column(Text)
+    has_details = Column(Boolean, default=False)
+    is_registerable = Column(Boolean, default=False)
+
+    sections = relationship("Section", back_populates="course")
+
+class Section(Base):
+    __tablename__ = 'sections'
+    id = Column(Integer, primary_key=True)
+    course_id = Column(Integer, ForeignKey('courses.id'))
+    class_section = Column(String(10))
     class_type = Column(String(10))
-    section_number = Column(String(10))
     professor_name = Column(String(100))
     class_capacity = Column(Integer)
     enrollment_total = Column(Integer)
-    meeting_days = Column(String(50))
+    enrollment_available = Column(Integer)
+    days = Column(String(50))
     start_time = Column(Time)
     end_time = Column(Time)
-    building = Column(String(50))
-    room = Column(String(50))
-    description = Column(String(255))
+    location = Column(String(255))  
+    is_active = Column(Boolean, default=True) 
+
+    course = relationship("Course", back_populates="sections")
     
 database_url = URL.create(
     drivername="postgresql",
