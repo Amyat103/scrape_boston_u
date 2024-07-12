@@ -38,7 +38,7 @@ class Browser:
             options.add_experimental_option("detach", True)
 
             self.service = Service(executable_path=driver_path)
-            self.browser = webdriver.Chrome(service=self.service, options=options)
+            self.browser = webdriver.Chrome(options=options)
 
     def openpage(self, url):
         print(url)
