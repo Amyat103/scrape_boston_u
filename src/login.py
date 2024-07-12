@@ -114,9 +114,6 @@ class Browser:
             print("didn't need login")
         
         return access_url
-
-            
-
     
     def wait_for_auth(self):
         try:
