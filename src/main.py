@@ -1,4 +1,3 @@
-import requests
 import os
 from dotenv import load_dotenv
 from selenium.webdriver.common.by import By
@@ -9,9 +8,7 @@ import json
 from scraper import Scraper
 import time
 from models import SessionLocal, Course, Section
-from contextlib import contextmanager
-from process import safe_extract, process_course
-
+from process import process_course
 
 load_dotenv()
 
@@ -49,40 +46,10 @@ def test_cascs():
         print("Courses data structure:", courses)
         
         db = SessionLocal()
-        for course_data in courses['courses']:
-            comp_details = scraper.get_complementary_details(course_data['crse_id'], course_data['effdt'], major, course_data['catalog_nbr'].strip(), course_data['typ_offr'])
-            print("Received complementary details:", comp_details) 
+        for course_data in courses:
+            process_course(course_data, db, major, scraper)
 
-            course = Course(
-                term=comp_details['effdt'],
-                major=major,
-                course_number=course_data['catalog_nbr'],
-                full_title=comp_details['course_title'],
-                description=comp_details['descrlong'],
-                has_details=True if comp_details else False
-            )
-            db.add(course)
-
-            if 'sections' in comp_details:
-                for sec in comp_details['sections']:
-                    section = Section(
-                        course=course,
-                        class_section=sec['class_section'],
-                        class_type=sec['component'],
-                        professor_name=sec['instructors'][0]['name'] if sec['instructors'] else None,
-                        class_capacity=sec['class_capacity'],
-                        enrollment_total=sec['enrollment_total'],
-                        enrollment_available=sec['enrollment_available'],
-                        days=sec['meetings'][0]['days'],
-                        start_time=sec['meetings'][0]['start_time'],
-                        end_time=sec['meetings'][0]['end_time'],
-                        location=sec['meetings'][0]['facility_descr']
-                    )
-                    db.add(section)
-
-            db.commit()
-
-            time.sleep(10)
+        driver.quit()
 
         driver.quit()
         
@@ -108,40 +75,8 @@ def test_casaa():
         print("Courses data structure:", courses)
         
         db = SessionLocal()
-        for course_data in courses['courses']:
-            comp_details = scraper.get_complementary_details(course_data['crse_id'], course_data['effdt'], major, course_data['catalog_nbr'].strip(), course_data['typ_offr'])
-            print("Received complementary details:", comp_details) 
-
-            course = Course(
-                term=comp_details['effdt'],
-                major=major,
-                course_number=course_data['catalog_nbr'],
-                full_title=comp_details['course_title'],
-                description=comp_details['descrlong'],
-                has_details=True if comp_details else False
-            )
-            db.add(course)
-
-            if 'sections' in comp_details:
-                for sec in comp_details['sections']:
-                    section = Section(
-                        course=course,
-                        class_section=sec['class_section'],
-                        class_type=sec['component'],
-                        professor_name=sec['instructors'][0]['name'] if sec['instructors'] else None,
-                        class_capacity=sec['class_capacity'],
-                        enrollment_total=sec['enrollment_total'],
-                        enrollment_available=sec['enrollment_available'],
-                        days=sec['meetings'][0]['days'],
-                        start_time=sec['meetings'][0]['start_time'],
-                        end_time=sec['meetings'][0]['end_time'],
-                        location=sec['meetings'][0]['facility_descr']
-                    )
-                    db.add(section)
-
-            db.commit()
-
-            time.sleep(10)
+        for course_data in courses:
+            process_course(course_data, db, major, scraper)
 
         driver.quit()
     
