@@ -2,17 +2,49 @@ from models import Course, Section
 from scraper import Scraper
 import logging
 import json
-from datetime import datetime
+from datetime import datetime, time
+import psycopg2
+
 
 def convert_time(time_str):
     if time_str:
         try:
-            time_obj = datetime.strptime(time_str.split('.')[0], '%H.%M.%S')
-            return time_obj.time()
-        except ValueError:
+            time_parts = time_str.split('.')
+            hours = int(time_parts[0])
+            minutes = int(time_parts[1])
+            
+            time_obj = datetime.strptime(f"{hours:02d}:{minutes:02d}", "%H:%M")
+            return time_obj.strftime("%I:%M %p").lower().lstrip('0')
+        except (ValueError, IndexError) as e:
+            print(f"Failed to parse time: {time_str}. Error: {e}")
             return None
     return None
 
+def process_log_and_update_db(log_path, db_connection_string):
+    try:
+        conn = psycopg2.connect(db_connection_string)
+        cur = conn.cursor()
+
+        with open(log_path, 'r') as file:
+            for line in file:
+                datetime_str = line.split(' - ')[0]
+                datetime_obj = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S,%f')
+                formatted_time = datetime_obj.strftime('%I:%M%p').lower()
+
+                cur.execute("INSERT INTO your_table (time_column) VALUES (%s)", (formatted_time,))
+                logging.info(f"Inserted time {formatted_time} into database.")
+
+        conn.commit()
+        cur.close()
+        conn.close()
+        logging.info("Database operations completed successfully.")
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        logging.error(f"Error while connecting to PostgreSQL: {error}")
+    finally:
+        if conn is not None:
+            conn.close()
+            logging.info("Database connection is closed.")
 
 def safe_extract(data, key, default=None):
     return data.get(key, default) if data else default
@@ -27,7 +59,6 @@ def process_course(course_data, db, major, scraper):
         logging.info(f"Processing course: {crse_id} - {catalog_nbr}")
 
         comp_details = scraper.get_complementary_details(crse_id, effdt, major, catalog_nbr, typ_offr)
-        logging.info(f"Complementary details for {crse_id}: {json.dumps(comp_details, indent=2)}")
 
         course_details = comp_details.get('course_details', {})
         
@@ -57,7 +88,9 @@ def process_course(course_data, db, major, scraper):
             is_registerable=is_registerable,
             short_title=short_title
         )
+
         db.add(course)
+        db.flush()
         logging.info(f"Added course to database: {catalog_nbr}")
 
         sections = []
@@ -68,14 +101,14 @@ def process_course(course_data, db, major, scraper):
             except Exception as e:
                 logging.error(f"Error fetching detailed info for course {crse_id}: {str(e)}")
 
-        logging.info(f"Sections for {catalog_nbr}: {json.dumps(sections, indent=2)}")
-
         for sec in sections:
-            start_time = convert_time(safe_extract(sec, 'meetings', [{}])[0].get('start_time'))
-            end_time = convert_time(safe_extract(sec, 'meetings', [{}])[0].get('end_time'))
+            start_time_raw = safe_extract(sec, 'meetings', [{}])[0].get('start_time')
+            end_time_raw = safe_extract(sec, 'meetings', [{}])[0].get('end_time')
+            start_time = convert_time(start_time_raw)
+            end_time = convert_time(end_time_raw)
             
             section = Section(
-                course=course,
+                course_id=course.id,
                 class_section=safe_extract(sec, 'class_section'),
                 class_type=safe_extract(sec, 'component'),
                 professor_name=safe_extract(sec, 'instructors', [{}])[0].get('name'),

@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Time, ForeignKey, Boolean, Text
+from sqlalchemy import create_engine, Column, Integer, String, Time, ForeignKey, Boolean, Text, text
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from sqlalchemy.engine import URL
 import os
@@ -33,8 +33,8 @@ class Section(Base):
     enrollment_total = Column(Integer)
     enrollment_available = Column(Integer)
     days = Column(String(50))
-    start_time = Column(Time)
-    end_time = Column(Time)
+    start_time = Column(String(50))
+    end_time = Column(String(50))
     location = Column(String(255))  
     is_active = Column(Boolean, default=True) 
 
@@ -55,6 +55,6 @@ def clear_database(db):
     db.commit()
 
 engine = create_engine(database_url)
-Base.metadata.create_all(engine)
 
+Base.metadata.create_all(engine)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
