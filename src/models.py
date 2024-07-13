@@ -42,11 +42,11 @@ class Section(Base):
     
 database_url = URL.create(
     drivername="postgresql",
-    username=os.getenv("POSTGRES_USERNAME"),
-    password=os.getenv("POSTGRES_PASSWORD"),
-    host="localhost",
-    port=5432,
-    database="scrape_bu"
+    username=os.getenv("PGUSER"),
+    password=os.getenv("PGPASSWORD"),
+    host=os.getenv("PGHOST"),
+    port=os.getenv("PGPORT"),
+    database=os.getenv("PGDATABASE")
 )
 
 def clear_database(db):
