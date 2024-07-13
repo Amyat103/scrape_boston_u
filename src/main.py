@@ -206,50 +206,6 @@ def test_cascs(scraper, db):
         except Exception as e:
             logging.error(f"Error processing CASCS course {course_data.get('catalog_nbr')}: {str(e)}")
 
-# def main():
-#     driver = None
-#     db = SessionLocal()
-
-#     try:
-#         clear_database(db)
-#         driver = user_profile.create_driver()
-#         browser = login.Browser(driver)
-#         scraper = Scraper(browser)
-
-#         majors = scraper.get_all_majors()
-#         logging.info(f"Retrieved {len(majors['subjects'])} majors")
-
-#         for major in majors['subjects']:
-#             major_code = major['subject']
-#             logging.info(f"Processing major: {major_code}")
-
-#             try:
-#                 courses = scraper.get_courses_from_major(major_code)['courses']
-#                 logging.info(f"Retrieved {len(courses)} courses for {major_code}")
-
-#                 for course_data in courses:
-#                     try:
-#                         process_course(course_data, db, major_code, scraper)
-#                     except Exception as e:
-#                         logging.error(f"Error processing course {course_data.get('catalog_nbr')} in {major_code}: {str(e)}")
-
-#                 logging.info(f"Finished processing all courses for {major_code}")
-#             except Exception as e:
-#                 logging.error(f"Error processing major {major_code}: {str(e)}")
-
-#             time.sleep(5)
-
-#         logging.info("Finished processing all majors and courses")
-
-#     except Exception as e:
-#         logging.error(f"Error in main: {str(e)}")
-#     finally:
-#         if db:
-#             db.close()
-#         if driver:
-#             driver.quit()
-
-
 def main():
     driver = None
     db = SessionLocal()
@@ -263,12 +219,8 @@ def main():
         majors = scraper.get_all_majors()
         logging.info(f"Retrieved {len(majors['subjects'])} majors")
 
-        selected_majors = majors['subjects'][:4]
-        logging.info(f"Selected 4 majors for processing")
-
-        total_courses = 0
-
-        for major in selected_majors:
+        for major in majors['subjects']:
+            # add slicing to test less majors
             major_code = major['subject']
             logging.info(f"Processing major: {major_code}")
 
@@ -279,24 +231,16 @@ def main():
                 for course_data in courses:
                     try:
                         process_course(course_data, db, major_code, scraper)
-                        total_courses += 1
-                        
-                        # Delay between 0.3 and 0.5 seconds for each course
-                        time.sleep(random.uniform(0.3, 0.5))
-
                     except Exception as e:
                         logging.error(f"Error processing course {course_data.get('catalog_nbr')} in {major_code}: {str(e)}")
 
-                db.commit()  # Commit after processing all courses in a major
                 logging.info(f"Finished processing all courses for {major_code}")
-                
-                # Sleep for 3 seconds between majors
-                time.sleep(3)
-
             except Exception as e:
                 logging.error(f"Error processing major {major_code}: {str(e)}")
 
-        logging.info(f"Finished processing 4 majors. Total courses processed: {total_courses}")
+            time.sleep(5)
+
+        logging.info("Finished processing all majors and courses")
 
     except Exception as e:
         logging.error(f"Error in main: {str(e)}")
@@ -313,28 +257,3 @@ if __name__ == "__main__":
     # run_tests()
 
     main()
-
-    # ONLY FOR TEST CASCS
-    # ONLY FOR CASCS
-    # combined_data = []
-    #   # Run the test 20 times
-    # data = test_cascs()
-    # combined_data.extend(data)
-
-    # with open("/Users/david/repos/scrape_boston_u/src/test.json", 'w', encoding='utf-8') as f:
-    #     json.dump(data, f, ensure_ascii=False, indent=4)
-
-
-
-
-# SOME CLASS DONT HAVE OFFERING
-            # if 'offerings' in comp_details and comp_details['offerings']:
-            #     offerings = comp_details['offerings'][0]
-            #     if 'open_terms' in offerings and offerings['open_terms']:
-            #         term = offerings['open_terms'][0].get('strm', '2248')
-            #     else:
-            #         term = '2248'
-            #         print(f"No valid term found for course {course['catalog_nbr']}. Using default term.")
-            # else:
-            #     term = '2248'
-            #     print(f"No offerings found for course {course['catalog_nbr']}. Using default term.")
