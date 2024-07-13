@@ -96,65 +96,6 @@ def get_term_from_offerings(data):
         if driver:
             driver.quit()
 
-
-# def main():
-#     # use profile
-#     driver = user_profile.create_driver()
-#     browser = login.Browser(driver)
-#     scraper = Scraper(browser)
-
-#     # login.py
-#     # browser.login_bu(os.getenv("TEST_LINK") ,os.getenv('USERNAME'), os.getenv('PASSWORD'))
-
-#     # get data
-#     majors = scraper.get_all_majors()
-#     print(majors)
-
-#     all_course_data = []
-#     course_count = 0
-#     max_courses = 30
-
-#     for major in majors['subjects']:
-#         print(f"working on {major['subject']}")
-
-#         if course_count >= max_courses:
-#             break
-
-#         courses = scraper.get_courses_from_major(major['subject'])
-#         for course in courses['courses']:
-#             comp_details = scraper.get_complementary_details(course['crse_id'], course['effdt'], major['subject'], course['catalog_nbr'].strip(), course['typ_offr'])
-#             print("Received complementary details:", comp_details)
-
-#             course_data = {
-#                 'complementary_details': comp_details
-#             }
-#             term = None
-            
-#             if 'offerings' in comp_details and any('open_terms' in offering for offering in comp_details['offerings']):
-#                 for offering in comp_details['offerings']:
-#                     if 'open_terms' in offering and offering['open_terms']:
-#                         term = offering['open_terms'][0]['strm']
-#                         detailed_info = scraper.get_course_details(course['crse_id'], term, offering['crse_offer_nbr'])
-#                         course_data['detailed_info'] = detailed_info
-#                         break
-#             if term is not None:
-#                 course_details = scraper.get_course_details(course['crse_id'], term, course['crse_offer_nbr'])
-#                 course_data['course_details'] = course_details
-#                 print(course_details)
-#             else:
-#                 print(f"No valid term found for course {course['catalog_nbr']}.")
-
-#             all_course_data.append(course_data)
-#             course_count += 1
-#             if course_count >= max_courses:
-#                 break
-
-#             time.sleep(10)
-
-#     # close after
-#     driver.quit()
-#     return all_course_data
-
 def get_db():
     db = SessionLocal()
     try:
@@ -220,7 +161,6 @@ def main():
         logging.info(f"Retrieved {len(majors['subjects'])} majors")
 
         for major in majors['subjects']:
-            # add slicing to test less majors
             major_code = major['subject']
             logging.info(f"Processing major: {major_code}")
 
@@ -251,9 +191,4 @@ def main():
             driver.quit()
 
 if __name__ == "__main__":
-    # login initial from login.py
-    # login.main()
-    # test_link()
-    # run_tests()
-
     main()

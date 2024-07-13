@@ -1,9 +1,3 @@
-# from selenium import webdriver
-# from selenium.webdriver.common.keys import keys
-# import time
-
-# driver = 
-
 from selenium import webdriver
 import os
 import time
@@ -16,15 +10,6 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from dotenv import load_dotenv
 
 load_dotenv()
-
-# options = Options()
-
-# options.add_argument("--window-size=1920,1080")
-
-# options.add_experimental_option("detach", True)
-
-# driver = webdriver.Chrome(options=options)
-# driver.get("https://www.youtube.com/")
 
 class Browser:
     def __init__(self, driver=None):
@@ -88,11 +73,9 @@ class Browser:
 
         if self.check_need_login():
             print(self.browser.current_url)
-            # find html field
             username_field = self.browser.find_element(By.ID, "j_username")
             password_field = self.browser.find_element(By.ID, "j_password")
 
-            # enter username and pass
             username_field.send_keys(username)
             password_field.send_keys(password)
 
@@ -123,28 +106,6 @@ class Browser:
             print("login success")
         except:
             print("Auth error, duo manual step")
-    # def login_if_required(self):
-    #     try:
-    #         username_field = self.browser.find_element(By.ID, "j_username")
-    #         password_field = self.browser.find_element(By.ID, "j_password")
-    #         username_field.send_keys(os.getenv('USERNAME'))
-    #         password_field.send_keys(os.getenv('PASSWORD'))
-    #         login_button = self.browser.find_element(By.CLASS_NAME, "input-submit")
-    #         login_button.click()
-
-    #         WebDriverWait(self.browser, 10).until(
-    #             EC.presence_of_element_located((By.ID, "duo_iframe"))
-    #         )
-
-    #         try:
-    #             remember_button = WebDriverWait(self.browser, 5).until(
-    #                 EC.element_to_be_clickable((By.ID, "trust-browser-button"))
-    #             )
-    #             remember_button.click()
-    #         except TimeoutException:
-    #             print("No 'Remember Device' button found.")
-    #     except NoSuchElementException:
-    #         print("Already logged in or no login needed.")
 
 
 
