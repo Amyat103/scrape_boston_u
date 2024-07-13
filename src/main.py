@@ -34,7 +34,7 @@ def get_term_from_offerings(data):
 
 def test_cascs():
     driver = None
-    db = None
+    db = SessionLocal()
 
     try:
         driver = user_profile.create_driver()
@@ -47,23 +47,24 @@ def test_cascs():
         
         db = SessionLocal()
         for course_data in courses:
-            process_course(course_data, db, major, scraper)
-
-        driver.quit()
-
-        driver.quit()
+            if 'offerings' in course_data and course_data['offerings']:
+                process_course(course_data, db, major, scraper)
+            else:
+                print(f"No offerings found for course {course_data['catalog_nbr']}. Skipping.")
         
     except Exception as e:
         print(f"Error in cascs {e}")
-        db.rollback()
-
+        if db:
+            db.rollback()
     finally:
-        db.close()
-        driver.quit()
+        if db:
+            db.close()
+        if driver:
+            driver.quit()
 
 def test_casaa():
     driver = None
-    db = None
+    db = SessionLocal()
 
     try:
         driver = user_profile.create_driver()
@@ -76,17 +77,20 @@ def test_casaa():
         
         db = SessionLocal()
         for course_data in courses:
-            process_course(course_data, db, major, scraper)
-
-        driver.quit()
+            if 'offerings' in course_data and course_data['offerings']:
+                process_course(course_data, db, major, scraper)
+            else:
+                print(f"No offerings found for course {course_data['catalog_nbr']}. Skipping.")
     
     except Exception as e:
-        print(f"Error in casaa {e}")
-        db.rollback()
-
+        print(f"Error in cascs {e}")
+        if db:
+            db.rollback()
     finally:
-        db.close()
-        driver.quit()
+        if db:
+            db.close()
+        if driver:
+            driver.quit()
 
 
 def main():
