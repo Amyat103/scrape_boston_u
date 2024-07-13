@@ -263,7 +263,6 @@ def main():
         majors = scraper.get_all_majors()
         logging.info(f"Retrieved {len(majors['subjects'])} majors")
 
-        # Limit to 4 majors
         selected_majors = majors['subjects'][:4]
         logging.info(f"Selected 4 majors for processing")
 
