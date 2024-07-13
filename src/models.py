@@ -49,6 +49,11 @@ database_url = URL.create(
     database="scrape_bu"
 )
 
+def clear_database(db):
+    db.query(Section).delete()
+    db.query(Course).delete()
+    db.commit()
+
 engine = create_engine(database_url)
 Base.metadata.create_all(engine)
 

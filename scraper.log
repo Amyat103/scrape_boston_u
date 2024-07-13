@@ -1,0 +1,182 @@
+2024-07-12 23:05:57,655 - INFO - Retrieved 5 courses for CASAA
+2024-07-12 23:05:57,655 - INFO - Processing course: 100005 - 100
+2024-07-12 23:05:57,973 - INFO - Complementary details for 100005: {
+  "course_details": {
+    "descrlong": "May be repeated for credit as topic varies.",
+    "units_minimum": 4,
+    "units_maximum": 4,
+    "units_inc": 0.5,
+    "grading_basis": "GRD",
+    "grading_basis_descr": "Graded",
+    "course_title": "Topics in African American Studies",
+    "rqmnt_designtn": "",
+    "effdt": "2019-09-03",
+    "components": [
+      {
+        "descr": "Independent",
+        "optional": "N"
+      }
+    ],
+    "attributes": [],
+    "offerings": [
+      {
+        "crse_offer_nbr": 1,
+        "subject": "CASAA",
+        "catalog_nbr": " 100",
+        "acad_career": "Undergraduate",
+        "acad_group": "College of Arts and Sciences",
+        "acad_org": "CAS African American Studies",
+        "campus": "Boston University",
+        "campus_cd": "MAIN",
+        "req_group": "",
+        "careers": [
+          {
+            "acad_career": "UGRD",
+            "descr": "Undergraduate",
+            "in_planner": false
+          }
+        ],
+        "open_terms": [],
+        "enrollable_terms": []
+      }
+    ]
+  }
+}
+2024-07-12 23:05:57,975 - INFO - Added course to database: 100
+2024-07-12 23:05:57,975 - INFO - Sections for 100: []
+2024-07-12 23:05:57,993 - INFO - Committed course 100 and its sections to database
+2024-07-12 23:05:57,993 - INFO - Processing course: 100007 - 103
+2024-07-12 23:05:58,307 - INFO - Complementary details for 100007: {
+  "course_details": {
+    "descrlong": "Undergraduate Prerequisites: First-Year Writing Seminar (WR 120 or equivalent) - What is the African American literary tradition? In this course, we will read poetry, slave narratives, essays, speeches, tales, short stories, and novels and consider how culture, politics, and history shape African American literature. Carries humanities divisional credit in CAS. Effective Fall 2018, this course fulfills a single unit in each of the following BU Hub areas: Aesthetic Exploration, Global Citizenship and Intercultural Literacy. Effective Fall 2019, this course fulfills a single unit in each of the following BU Hub areas: Aesthetic Exploration, Global Citizenship and Intercultural Literacy, Critical Thinking. Effective Fall 2022, this course fulfills a single unit in each of the following BU Hub areas: Writing-Intensive Course, Global Citizenship and Intercultural Literacy, Critical Thinking.",
+    "units_minimum": 4,
+    "units_maximum": 4,
+    "units_inc": 0.5,
+    "grading_basis": "GRD",
+    "grading_basis_descr": "Graded",
+    "course_title": "Introduction to African American Literature",
+    "rqmnt_designtn": "",
+    "effdt": "2022-09-06",
+    "components": [
+      {
+        "descr": "Independent",
+        "optional": "N"
+      }
+    ],
+    "attributes": [
+      {
+        "crse_attribute": "HUB",
+        "crse_attribute_descr": "Hub Requirements",
+        "crse_attribute_value": "CRT",
+        "crse_attribute_value_descr": "HUB Critical Thinking"
+      },
+      {
+        "crse_attribute": "HUB",
+        "crse_attribute_descr": "Hub Requirements",
+        "crse_attribute_value": "GCI",
+        "crse_attribute_value_descr": "HUB Global Citizensh/Intercult"
+      },
+      {
+        "crse_attribute": "HUB",
+        "crse_attribute_descr": "Hub Requirements",
+        "crse_attribute_value": "WIN",
+        "crse_attribute_value_descr": "HUB Writing-Intensive Course"
+      }
+    ],
+    "offerings": [
+      {
+        "crse_offer_nbr": 1,
+        "subject": "CASAA",
+        "catalog_nbr": " 103",
+        "acad_career": "Undergraduate",
+        "acad_group": "College of Arts and Sciences",
+        "acad_org": "CAS African American Studies",
+        "campus": "Boston University",
+        "campus_cd": "MAIN",
+        "req_group": "",
+        "careers": [
+          {
+            "acad_career": "UGRD",
+            "descr": "Undergraduate",
+            "in_planner": false
+          }
+        ],
+        "open_terms": [
+          {
+            "strm": "2248",
+            "descr": "Fall 2024",
+            "default_term": false
+          }
+        ],
+        "enrollable_terms": []
+      }
+    ]
+  }
+}
+2024-07-12 23:05:58,307 - INFO - Added course to database: 103
+2024-07-12 23:05:58,701 - INFO - Sections for 103: [
+  {
+    "combined_section": true,
+    "enrl_stat": "C",
+    "enrl_stat_descr": "Closed",
+    "crse_id": "100007",
+    "crse_offer_nbr": 1,
+    "crs_topic_id": 0,
+    "descr": "Intro African American Lit",
+    "subject": "CASAA",
+    "catalog_nbr": "103",
+    "class_section": "A1",
+    "class_nbr": 1006,
+    "class_type": "E",
+    "session_code": "1",
+    "session": "Regular Academic Session",
+    "schedule_print": "Y",
+    "class_stat": "A",
+    "wait_tot": 0,
+    "wait_cap": 0,
+    "class_capacity": 20,
+    "enrollment_total": 20,
+    "enrollment_available": 0,
+    "component": "IND",
+    "start_dt": "09/03/2024",
+    "end_dt": "12/10/2024",
+    "units": "4",
+    "topic": "",
+    "instructors": [
+      {
+        "name": "Maryanne Boelcskevy",
+        "email": ""
+      }
+    ],
+    "section_type": "IND",
+    "meetings": [
+      {
+        "days": "MoWeFr",
+        "start_time": "10.10.00.000000-05:00",
+        "end_time": "11.00.00.000000-05:00",
+        "start_dt": "09/03/2024",
+        "end_dt": "12/10/2024",
+        "bldg_cd": "STH",
+        "bldg_has_coordinates": false,
+        "facility_descr": "745 Commonwealth Ave STH B22",
+        "room": "B22",
+        "facility_id": "STH B22",
+        "instructor": "Maryanne Boelcskevy"
+      }
+    ],
+    "crse_attr": "HUB",
+    "crse_attr_value": "HUB-CRT,HUB-GCI,HUB-WIN",
+    "reserve_caps": [],
+    "reserved_combined_info": {
+      "class_enrl_cap": 20,
+      "combined_enrl_cap": 35,
+      "enrl_tot_other_combined": 15
+    },
+    "isInCart": false,
+    "isEnrolled": false,
+    "isWaitlisted": false
+  }
+]
+2024-07-12 23:05:58,703 - INFO - Added section to database: 103 - A1 (Start: None, End: None)
+2024-07-12 23:05:58,722 - INFO - Committed course 103 and its sections to database
+2024-07-12 23:05:58,722 - INFO - Processing course: 100006 - 103S

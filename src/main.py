@@ -7,10 +7,18 @@ import user_profile
 import json
 from scraper import Scraper
 import time
-from models import SessionLocal, Course, Section
+from models import SessionLocal, Course, Section, clear_database
 from process import process_course
+import logging
 
 load_dotenv()
+
+logging.basicConfig(level=logging.INFO, 
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    filename='scraper.log',
+                    filemode='w')
+
+
 
 def test_link(driver):
     test_link = os.getenv("TEST_LINK")
@@ -32,7 +40,35 @@ def get_term_from_offerings(data):
         print(f"Data received was: {json.dumps(data, indent=4)}")
         return None
 
-def test_cascs():
+# def test_casaa():
+#     driver = None
+#     db = SessionLocal()
+
+#     try:
+#         clear_database(db)
+#         driver = user_profile.create_driver()
+#         browser = login.Browser(driver)
+#         scraper = Scraper(browser)
+
+#         major = "CASAA"
+#         courses = scraper.get_courses_from_major(major)['courses'][:5]
+#         logging.info(f"Retrieved {len(courses)} courses for CASAA")
+
+#         for course_data in courses:
+#             try:
+#                 process_course(course_data, db, major, scraper)
+#             except Exception as e:
+#                 logging.error(f"Error processing course {course_data.get('catalog_nbr')}: {str(e)}")
+
+#     except Exception as e:
+#         logging.error(f"Error in test_casaa: {str(e)}")
+#     finally:
+#         if db:
+#             db.close()
+#         if driver:
+#             driver.quit()
+
+# def test_cascs():
     driver = None
     db = SessionLocal()
 
@@ -43,49 +79,16 @@ def test_cascs():
 
         major = "CASCS"
         courses = scraper.get_courses_from_major(major)['courses'][:5]
-        print("Courses data structure:", courses)
-        
-        db = SessionLocal()
+        logging.info(f"Retrieved {len(courses)} courses for CASCS")
+
         for course_data in courses:
-            if 'offerings' in course_data and course_data['offerings']:
+            try:
                 process_course(course_data, db, major, scraper)
-            else:
-                print(f"No offerings found for course {course_data['catalog_nbr']}. Skipping.")
-        
+            except Exception as e:
+                logging.error(f"Error processing course {course_data.get('catalog_nbr')}: {str(e)}")
+
     except Exception as e:
-        print(f"Error in cascs {e}")
-        if db:
-            db.rollback()
-    finally:
-        if db:
-            db.close()
-        if driver:
-            driver.quit()
-
-def test_casaa():
-    driver = None
-    db = SessionLocal()
-
-    try:
-        driver = user_profile.create_driver()
-        browser = login.Browser(driver)
-        scraper = Scraper(browser)
-
-        major = "CASAA"
-        courses = scraper.get_courses_from_major(major)['courses'][:5]
-        print("Courses data structure:", courses)
-        
-        db = SessionLocal()
-        for course_data in courses:
-            if 'offerings' in course_data and course_data['offerings']:
-                process_course(course_data, db, major, scraper)
-            else:
-                print(f"No offerings found for course {course_data['catalog_nbr']}. Skipping.")
-    
-    except Exception as e:
-        print(f"Error in cascs {e}")
-        if db:
-            db.rollback()
+        logging.error(f"Error in test_cascs: {str(e)}")
     finally:
         if db:
             db.close()
@@ -159,15 +162,54 @@ def get_db():
         db.close()
 
 
+def run_tests():
+    driver = None
+    db = SessionLocal()
+
+    try:
+        clear_database(db)
+        driver = user_profile.create_driver()
+        browser = login.Browser(driver)
+        scraper = Scraper(browser)
+
+        test_casaa(scraper, db)
+        test_cascs(scraper, db)
+
+    except Exception as e:
+        logging.error(f"Error in run_tests: {str(e)}")
+    finally:
+        if db:
+            db.close()
+        if driver:
+            driver.quit()
+
+def test_casaa(scraper, db):
+    major = "CASAA"
+    courses = scraper.get_courses_from_major(major)['courses'][:5]
+    logging.info(f"Retrieved {len(courses)} courses for CASAA")
+
+    for course_data in courses:
+        try:
+            process_course(course_data, db, major, scraper)
+        except Exception as e:
+            logging.error(f"Error processing CASAA course {course_data.get('catalog_nbr')}: {str(e)}")
+
+def test_cascs(scraper, db):
+    major = "CASCS"
+    courses = scraper.get_courses_from_major(major)['courses'][:5]
+    logging.info(f"Retrieved {len(courses)} courses for CASCS")
+
+    for course_data in courses:
+        try:
+            process_course(course_data, db, major, scraper)
+        except Exception as e:
+            logging.error(f"Error processing CASCS course {course_data.get('catalog_nbr')}: {str(e)}")
+
 if __name__ == "__main__":
     # login initial from login.py
     # login.main()
     # test_link()
-    
-    test_casaa()
-    test_cascs()
-
-
+    run_tests()
 
     # ONLY FOR TEST CASCS
     # ONLY FOR CASCS
