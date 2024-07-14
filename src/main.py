@@ -8,7 +8,7 @@ import json
 from scraper import Scraper
 import time
 from models import SessionLocal, Course, Section, clear_database
-from process import process_course
+from process import process_course, process_major
 import logging
 import random
 
@@ -152,7 +152,6 @@ def main():
     db = SessionLocal()
 
     try:
-        clear_database(db)
         driver = user_profile.create_driver()
         browser = login.Browser(driver)
         scraper = Scraper(browser)
@@ -160,25 +159,24 @@ def main():
         majors = scraper.get_all_majors()
         logging.info(f"Retrieved {len(majors['subjects'])} majors")
 
+        # major_count = 0
+        # max_major = 5
+
         for major in majors['subjects']:
+            # if major_count >= max_major:
+            #     break
+
             major_code = major['subject']
             logging.info(f"Processing major: {major_code}")
 
             try:
-                courses = scraper.get_courses_from_major(major_code)['courses']
-                logging.info(f"Retrieved {len(courses)} courses for {major_code}")
-
-                for course_data in courses:
-                    try:
-                        process_course(course_data, db, major_code, scraper)
-                    except Exception as e:
-                        logging.error(f"Error processing course {course_data.get('catalog_nbr')} in {major_code}: {str(e)}")
-
+                process_major(major_code, scraper, db)
                 logging.info(f"Finished processing all courses for {major_code}")
             except Exception as e:
                 logging.error(f"Error processing major {major_code}: {str(e)}")
 
             time.sleep(5)
+            # major_count += 1
 
         logging.info("Finished processing all majors and courses")
 

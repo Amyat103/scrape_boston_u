@@ -56,6 +56,10 @@ def process_course(course_data, db, major, scraper):
         catalog_nbr = safe_extract(course_data, 'catalog_nbr', '').strip()
         typ_offr = safe_extract(course_data, 'typ_offr')
 
+
+        existing_course = db.query(Course).filter_by(course_number=catalog_nbr, major=major).first()
+
+
         logging.info(f"Processing course: {crse_id} - {catalog_nbr}")
 
         comp_details = scraper.get_complementary_details(crse_id, effdt, major, catalog_nbr, typ_offr)
@@ -78,53 +82,82 @@ def process_course(course_data, db, major, scraper):
                     term = offering['open_terms'][0]['strm']
                     break
 
-        course = Course(
-            term=course_details.get('effdt'),
-            major=major,
-            course_number=catalog_nbr,
-            full_title=course_details.get('course_title'),
-            description=course_details.get('descrlong'),
-            has_details=bool(comp_details),
-            is_registerable=is_registerable,
-            short_title=short_title
-        )
-
-        db.add(course)
-        db.flush()
-        logging.info(f"Added course to database: {catalog_nbr}")
+        if existing_course:
+            existing_course.term = term
+            existing_course.full_title = course_details.get('course_title')
+            existing_course.description = course_details.get('descrlong')
+            existing_course.has_details = bool(course_details)
+            existing_course.is_registerable = is_registerable
+            existing_course.short_title = short_title
+            logging.info(f"Updated existing course: {major} {catalog_nbr}")
+        else:
+            new_course = Course(
+                term=term,
+                major=major,
+                course_number=catalog_nbr,
+                full_title=course_details.get('course_title'),
+                description=course_details.get('descrlong'),
+                has_details=bool(course_details),
+                is_registerable=is_registerable,
+                short_title=short_title
+            )
+            db.add(new_course)
+            db.flush()
+            existing_course = new_course
+            logging.info(f"Added new course: {major} {catalog_nbr}")
 
         sections = []
         if term:
             try:
+                db.query(Section).filter_by(course_id=existing_course.id).delete()
+
                 detailed_info = scraper.get_course_details(crse_id, term, "1")
                 sections = detailed_info.get('sections', [])
+
+                for sec in sections:
+                    start_time_raw = safe_extract(sec, 'meetings', [{}])[0].get('start_time')
+                    end_time_raw = safe_extract(sec, 'meetings', [{}])[0].get('end_time')
+                    start_time = convert_time(start_time_raw)
+                    end_time = convert_time(end_time_raw)
+                    
+                    section = Section(
+                        course_id=existing_course.id,
+                        class_section=safe_extract(sec, 'class_section'),
+                        class_type=safe_extract(sec, 'component'),
+                        professor_name=safe_extract(sec, 'instructors', [{}])[0].get('name'),
+                        class_capacity=safe_extract(sec, 'class_capacity', 0),
+                        enrollment_total=safe_extract(sec, 'enrollment_total', 0),
+                        enrollment_available=safe_extract(sec, 'enrollment_available', 0),
+                        days=safe_extract(sec, 'meetings', [{}])[0].get('days'),
+                        start_time=start_time,
+                        end_time=end_time,
+                        location=safe_extract(sec, 'meetings', [{}])[0].get('facility_descr')
+                    )
+                    db.add(section)
+                    logging.info(f"Added section to database: {catalog_nbr} - {sec.get('class_section')} (Start: {start_time}, End: {end_time})")
             except Exception as e:
                 logging.error(f"Error fetching detailed info for course {crse_id}: {str(e)}")
-
-        for sec in sections:
-            start_time_raw = safe_extract(sec, 'meetings', [{}])[0].get('start_time')
-            end_time_raw = safe_extract(sec, 'meetings', [{}])[0].get('end_time')
-            start_time = convert_time(start_time_raw)
-            end_time = convert_time(end_time_raw)
-            
-            section = Section(
-                course_id=course.id,
-                class_section=safe_extract(sec, 'class_section'),
-                class_type=safe_extract(sec, 'component'),
-                professor_name=safe_extract(sec, 'instructors', [{}])[0].get('name'),
-                class_capacity=safe_extract(sec, 'class_capacity', 0),
-                enrollment_total=safe_extract(sec, 'enrollment_total', 0),
-                enrollment_available=safe_extract(sec, 'enrollment_available', 0),
-                days=safe_extract(sec, 'meetings', [{}])[0].get('days'),
-                start_time=start_time,
-                end_time=end_time,
-                location=safe_extract(sec, 'meetings', [{}])[0].get('facility_descr')
-            )
-            db.add(section)
-            logging.info(f"Added section to database: {catalog_nbr} - {sec.get('class_section')} (Start: {start_time}, End: {end_time})")
 
         db.commit()
         logging.info(f"Committed course {catalog_nbr} and its sections to database")
     except Exception as e:
         logging.error(f"Error processing course {crse_id}: {str(e)}")
         db.rollback()
+
+
+def process_major(major_code, scraper, db):
+    courses = scraper.get_courses_from_major(major_code)['courses']
+    processed_course_numbers = set()
+
+    for course_data in courses:
+        catalog_nbr = safe_extract(course_data, 'catalog_nbr', '').strip()
+        process_course(course_data, db, major_code, scraper)
+        processed_course_numbers.add(catalog_nbr)
+
+    db_courses = db.query(Course).filter_by(major=major_code).all()
+    for db_course in db_courses:
+        if db_course.course_number not in processed_course_numbers:
+            db_course.is_active = False
+            logging.info(f"Deactivated course: {major_code} {db_course.course_number}")
+
+    db.commit()
