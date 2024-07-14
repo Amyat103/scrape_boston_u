@@ -19,8 +19,6 @@ logging.basicConfig(level=logging.DEBUG,
                     filename='scraper.log',
                     filemode='w')
 
-
-
 def test_link(driver):
     test_link = os.getenv("TEST_LINK")
 
@@ -40,34 +38,6 @@ def get_term_from_offerings(data):
         print(f"Failed to extract term due to an error: {e}")
         print(f"Data received was: {json.dumps(data, indent=4)}")
         return None
-
-# def test_casaa():
-#     driver = None
-#     db = SessionLocal()
-
-#     try:
-#         clear_database(db)
-#         driver = user_profile.create_driver()
-#         browser = login.Browser(driver)
-#         scraper = Scraper(browser)
-
-#         major = "CASAA"
-#         courses = scraper.get_courses_from_major(major)['courses'][:5]
-#         logging.info(f"Retrieved {len(courses)} courses for CASAA")
-
-#         for course_data in courses:
-#             try:
-#                 process_course(course_data, db, major, scraper)
-#             except Exception as e:
-#                 logging.error(f"Error processing course {course_data.get('catalog_nbr')}: {str(e)}")
-
-#     except Exception as e:
-#         logging.error(f"Error in test_casaa: {str(e)}")
-#     finally:
-#         if db:
-#             db.close()
-#         if driver:
-#             driver.quit()
 
 # def test_cascs():
     driver = None
