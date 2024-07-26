@@ -1,2 +1,3 @@
 # scrape_boston_u
-test scraping boston u
+
+Web Scraper to get data for my fullstack project
