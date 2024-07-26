@@ -314,5 +314,5 @@ def main_subset():
 
 
 if __name__ == "__main__":
-    # main()
-    main_subset()
+    main()
+    # main_subset()
