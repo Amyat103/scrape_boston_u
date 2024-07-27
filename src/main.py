@@ -39,22 +39,6 @@ def test_link(driver):
     return data
 
 
-# def process_major_chunk(major_chunk, db_url):
-#     engine = create_engine(db_url)
-#     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-#     db = SessionLocal()
-
-#     try:
-#         for major_code in major_chunk:
-#             try:
-#                 with db.begin():
-#                     process_major(major_code, Scraper, db)
-#             except Exception as e:
-#                 logging.error(f"Error processing major {major_code}: {str(e)}")
-#     finally:
-#         db.close()
-
-
 def process_major_chunk(major_chunk, db_url):
     logging.info(f"Starting to process chunk of {len(major_chunk)} majors")
     engine = None
