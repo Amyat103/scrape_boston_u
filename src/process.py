@@ -93,16 +93,14 @@ def process_course(course_data, db, major, scraper):
                     term = offering["open_terms"][0]["strm"]
                     break
 
-        class_attributes = course_details.get("enrollment_information", {}).get(
-            "class_attributes", ""
-        )
-        hub_attributes = [
-            attr.replace("HUB ", "").strip()
-            for attr in class_attributes.split("\r")
-            if attr.startswith("HUB ")
-        ]
+        units = str(course_details.get("units_minimum", ""))
 
-        units = course_details.get("units", "").split()[0]
+        hub_attributes = []
+        for attr in course_details.get("attributes", []):
+            if attr.get("crse_attribute") == "HUB":
+                hub_value = attr.get("crse_attribute_value_descr", "")
+                if hub_value.startswith("HUB "):
+                    hub_attributes.append(hub_value[4:])
 
         if existing_course:
             existing_course.term = term
