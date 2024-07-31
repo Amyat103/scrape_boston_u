@@ -93,6 +93,17 @@ def process_course(course_data, db, major, scraper):
                     term = offering["open_terms"][0]["strm"]
                     break
 
+        class_attributes = course_details.get("enrollment_information", {}).get(
+            "class_attributes", ""
+        )
+        hub_attributes = [
+            attr.replace("HUB ", "").strip()
+            for attr in class_attributes.split("\r")
+            if attr.startswith("HUB ")
+        ]
+
+        units = course_details.get("units", "").split()[0]
+
         if existing_course:
             existing_course.term = term
             existing_course.full_title = course_details.get("course_title")
@@ -100,6 +111,8 @@ def process_course(course_data, db, major, scraper):
             existing_course.has_details = bool(course_details)
             existing_course.is_registerable = is_registerable
             existing_course.short_title = short_title
+            existing_course.hub_attributes = json.dumps(hub_attributes)
+            existing_course.units = units
             existing_course.updated_at = func.now()
             logging.info(f"Updated existing course: {major} {catalog_nbr}")
         else:
@@ -112,6 +125,8 @@ def process_course(course_data, db, major, scraper):
                 has_details=bool(course_details),
                 is_registerable=is_registerable,
                 short_title=short_title,
+                hub_attributes=json.dumps(hub_attributes),
+                units=units,
             )
             db.add(new_course)
             db.flush()
