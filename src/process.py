@@ -76,6 +76,8 @@ def process_course(course_data, db, major, scraper):
         )
 
         course_details = comp_details.get("course_details", {})
+        hub_attributes = comp_details.get("processed_hub_attributes", [])
+        units = comp_details.get("processed_units", "")
 
         short_title = f"{major[-2:]}{catalog_nbr}"
 
@@ -92,15 +94,6 @@ def process_course(course_data, db, major, scraper):
                 if offering.get("open_terms"):
                     term = offering["open_terms"][0]["strm"]
                     break
-
-        units = str(course_details.get("units_minimum", ""))
-
-        hub_attributes = []
-        for attr in course_details.get("attributes", []):
-            if attr.get("crse_attribute") == "HUB":
-                hub_value = attr.get("crse_attribute_value_descr", "")
-                if hub_value.startswith("HUB "):
-                    hub_attributes.append(hub_value[4:])
 
         if existing_course:
             existing_course.term = term
@@ -172,6 +165,15 @@ def process_course(course_data, db, major, scraper):
                     logging.info(
                         f"Added section to database: {catalog_nbr} - {sec.get('class_section')} (Start: {start_time}, End: {end_time})"
                     )
+
+                if sections:
+                    units_from_sections = sections[0].get("units")
+                    if units_from_sections and units_from_sections != units:
+                        logging.warning(
+                            f"Units mismatch for {major} {catalog_nbr}: {units} vs {units_from_sections}"
+                        )
+                    units = units_from_sections or units
+                    existing_course.units = units
             except Exception as e:
                 logging.error(
                     f"Error processing sections for course {crse_id}: {str(e)}"

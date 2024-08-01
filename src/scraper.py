@@ -81,17 +81,28 @@ class Scraper:
         print(f"Complementary URL: {complementary_url}")
         if not complementary_url:
             raise ValueError("Complementary URL is not formed correctly.")
-        return self.get_json_from_page(complementary_url)
 
-    def get_complementary_details(
-        self, course_id, effdt, subject, catalog_nbr, typ_offr
-    ):
-        complementary_url = os.getenv("COMPLEMENTARY_COURSE_LINK").format(
-            course_id=course_id,
-            effdt=effdt,
-            crse_offer_nbr="1",
-            subject=subject,
-            catalog_nbr=catalog_nbr,
-            typ_offr=typ_offr,
+        data = self.get_json_from_page(complementary_url)
+
+        course_details = data.get("course_details", {})
+
+        hub_attributes = []
+        for attr in course_details.get("attributes", []):
+            if attr.get("crse_attribute") == "HUB":
+                hub_value = attr.get("crse_attribute_value_descr", "")
+                if hub_value.startswith("HUB "):
+                    hub_attributes.append(hub_value[4:])
+
+        units = str(course_details.get("units_minimum", ""))
+
+        data["processed_hub_attributes"] = hub_attributes
+        data["processed_units"] = units
+
+        return data
+
+    def get_course_details(self, course_id, term, crse_offer_nbr):
+        course_url = os.getenv("COURSE_LINK").format(
+            course_id=course_id, term=term, crse_offer_nbr=crse_offer_nbr
         )
-        return self.get_json_from_page(complementary_url)
+        data = self.get_json_from_page(course_url)
+        return data
