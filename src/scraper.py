@@ -9,14 +9,21 @@ from selenium.webdriver.support.ui import WebDriverWait
 from login import Browser
 
 
+def save_json_to_file(data, filename):
+    os.makedirs("json", exist_ok=True)
+    with open(os.path.join("json", filename), "w") as f:
+        json.dump(data, f, indent=2)
+
+
 class Scraper:
     def __init__(self, browser):
         self.browser = browser
 
     def openpage(self, url):
-        print(f"Attempting to open URL: {url}")
+        print(f"Attempting to open URL: {url[-5:]}")
         self.browser.openpage(url)
         if self.check_need_login():
+            print(f"Successfully opened URL: {url[-5:]}")
             self.login_bu(url)
 
     def check_need_login(self):
@@ -65,7 +72,9 @@ class Scraper:
 
     def get_courses_from_major(self, major):
         courses_url = os.getenv("COURSES_IN_MAJOR").format(major=major)
-        return self.get_json_from_page(courses_url)
+        data = self.get_json_from_page(courses_url)
+        save_json_to_file(data, f"{major}_courses.json")
+        return data
 
     def get_complementary_details(
         self, course_id, effdt, subject, catalog_nbr, typ_offr

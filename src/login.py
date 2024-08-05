@@ -1,15 +1,17 @@
-from selenium import webdriver
 import os
 import time
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+
 from dotenv import load_dotenv
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 load_dotenv()
+
 
 class Browser:
     def __init__(self, driver=None):
@@ -17,7 +19,7 @@ class Browser:
             self.browser = driver
         else:
             dir_path = os.path.dirname(os.path.realpath(__file__))
-            driver_path = os.path.join(dir_path, 'chromedriver')
+            driver_path = os.path.join(dir_path, "chromedriver")
 
             options = Options()
             options.add_experimental_option("detach", True)
@@ -26,20 +28,22 @@ class Browser:
             self.browser = webdriver.Chrome(options=options)
 
     def openpage(self, url):
-        print(url)
+        print(f"Logging in {url[-5:]}")
         self.browser.get(url)
         try:
             WebDriverWait(self.browser, 10).until(
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
             )
         except TimeoutException:
-            print("Failed to load the login page. Current URL:", self.browser.current_url)
-        
+            print(
+                "Failed to load the login page. Current URL:", self.browser.current_url
+            )
+
         return self.browser.current_url
 
     def close_browser(self):
         self.browser.close()
-    
+
     def add_input(self, by, value, text):
         field = self.browser.find_element(by=by, value=value)
         field.send_keys(text)
@@ -92,12 +96,12 @@ class Browser:
                 self.click_remember()
             except TimeoutException:
                 print("No duo needed, logged in")
-            
+
         else:
             print("didn't need login")
-        
+
         return access_url
-    
+
     def wait_for_auth(self):
         try:
             WebDriverWait(self.browser, 100).until(
@@ -106,7 +110,6 @@ class Browser:
             print("login success")
         except:
             print("Auth error, duo manual step")
-
 
 
 # ONLY FOR TESTING BROWSER CLASS
@@ -119,14 +122,16 @@ def perform_login():
     term = "2248"
     crse_offer_nbr = "1"
 
-    course_url = base_url.format(course_id=course_id, term=term, crse_offer_nbr=crse_offer_nbr)
+    course_url = base_url.format(
+        course_id=course_id, term=term, crse_offer_nbr=crse_offer_nbr
+    )
 
     browser.openpage(course_url)
     print(course_url)
     time.sleep(3)
 
-    my_username = os.getenv('USERNAME')
-    my_password = os.getenv('PASSWORD')
+    my_username = os.getenv("USERNAME")
+    my_password = os.getenv("PASSWORD")
     browser.login_bu(my_username, my_password)
     time.sleep(10)
 
@@ -134,6 +139,3 @@ def perform_login():
 
     time.sleep(10)
     browser.close_browser()
-
-
-
