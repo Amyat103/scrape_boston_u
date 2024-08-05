@@ -139,7 +139,7 @@ def update_professor_ratings(force_update=False):
             else:
                 print("Encountered a section with no professor name")
 
-            time.sleep(random.uniform(1, 3))
+            time.sleep(random.uniform(1, 2))
 
         session.commit()
         print("Finished updating professor ratings")

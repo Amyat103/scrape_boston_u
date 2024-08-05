@@ -41,6 +41,12 @@ class Course(Base):
 
     sections = relationship("Section", back_populates="course")
 
+    def needs_update(self, new_data):
+        for key, value in new_data.items():
+            if key != "sections" and getattr(self, key) != value:
+                return True
+        return False
+
 
 class Section(Base):
     __tablename__ = "sections"
@@ -65,14 +71,7 @@ class Section(Base):
     course = relationship("Course", back_populates="sections")
 
 
-database_url = URL.create(
-    drivername="postgresql",
-    username=os.getenv("PGUSER"),
-    password=os.getenv("PGPASSWORD"),
-    host=os.getenv("PGHOST"),
-    port=os.getenv("PGPORT"),
-    database=os.getenv("PGDATABASE"),
-)
+database_url = os.getenv("DB_PUBLIC")
 
 
 def clear_database(db):
@@ -81,7 +80,6 @@ def clear_database(db):
     db.commit()
 
 
-engine = create_engine(database_url)
-
+engine = create_engine(database_url, pool_size=20, max_overflow=0)
 Base.metadata.create_all(engine)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

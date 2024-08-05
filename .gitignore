@@ -3,3 +3,5 @@ config.py
 venv/
 scraper.log
 test.json
+
+src/json/*.json
