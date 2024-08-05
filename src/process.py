@@ -88,8 +88,6 @@ def process_course(course_data, major, scraper):
             comp_details = {}
 
         course_details = comp_details.get("course_details", {})
-        hub_attributes = comp_details.get("processed_hub_attributes", [])
-        units = comp_details.get("processed_units", "")
 
         short_title = f"{major[-2:]}{catalog_nbr}"
 
@@ -102,6 +100,47 @@ def process_course(course_data, major, scraper):
                     term = offering["open_terms"][0]["strm"]
                     break
 
+<<<<<<< HEAD
+=======
+        units = str(course_details.get("units_minimum", ""))
+
+        hub_attributes = []
+        for attr in course_details.get("attributes", []):
+            if attr.get("crse_attribute") == "HUB":
+                hub_value = attr.get("crse_attribute_value_descr", "")
+                if hub_value.startswith("HUB "):
+                    hub_attributes.append(hub_value[4:])
+
+        if existing_course:
+            existing_course.term = term
+            existing_course.full_title = course_details.get("course_title")
+            existing_course.description = course_details.get("descrlong")
+            existing_course.has_details = bool(course_details)
+            existing_course.is_registerable = is_registerable
+            existing_course.short_title = short_title
+            existing_course.hub_attributes = json.dumps(hub_attributes)
+            existing_course.units = units
+            existing_course.updated_at = func.now()
+            logging.info(f"Updated existing course: {major} {catalog_nbr}")
+        else:
+            new_course = Course(
+                term=term,
+                major=major,
+                course_number=catalog_nbr,
+                full_title=course_details.get("course_title"),
+                description=course_details.get("descrlong"),
+                has_details=bool(course_details),
+                is_registerable=is_registerable,
+                short_title=short_title,
+                hub_attributes=json.dumps(hub_attributes),
+                units=units,
+            )
+            db.add(new_course)
+            db.flush()
+            existing_course = new_course
+            logging.info(f"Added new course: {major} {catalog_nbr}")
+
+>>>>>>> a4f1fcb (Revert "update scraping for new columns")
         sections = []
         if term:
             try:
@@ -192,10 +231,35 @@ def process_major(major_code, scraper, db):
                     print(
                         f"Added section to database: {catalog_nbr} - {sec.get('class_section')}"
                     )
+<<<<<<< HEAD
 
             processed_course_numbers.add(catalog_nbr)
         except Exception as e:
             print(f"Error processing course {course_data.get('catalog_nbr')}: {str(e)}")
+=======
+            except Exception as e:
+                logging.error(
+                    f"Error processing sections for course {crse_id}: {str(e)}"
+                )
+
+        db.commit()
+        logging.info(f"Committed course {catalog_nbr} and its sections to database")
+        return existing_course, sections
+    except Exception as e:
+        logging.error(f"Error processing course {crse_id} - {catalog_nbr}: {str(e)}")
+        db.rollback()
+        raise
+
+
+def process_major(major_code, scraper, db):
+    courses = scraper.get_courses_from_major(major_code)["courses"]
+    processed_course_numbers = set()
+
+    for course_data in courses:
+        catalog_nbr = safe_extract(course_data, "catalog_nbr", "").strip()
+        process_course(course_data, db, major_code, scraper)
+        processed_course_numbers.add(catalog_nbr)
+>>>>>>> a4f1fcb (Revert "update scraping for new columns")
 
     db_courses = db.query(Course).filter_by(major=major_code).all()
     for db_course in db_courses:

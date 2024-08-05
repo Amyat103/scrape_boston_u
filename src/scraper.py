@@ -100,7 +100,9 @@ class Scraper:
         print(f"Complementary URL: {complementary_url}")
         if not complementary_url:
             raise ValueError("Complementary URL is not formed correctly.")
+        return self.get_json_from_page(complementary_url)
 
+<<<<<<< HEAD
         data = self.get_json_from_page(complementary_url)
         print(f"Complementary details fetched successfully for {subject} {catalog_nbr}")
 
@@ -141,3 +143,17 @@ class Scraper:
             f">>> Exiting get_course_details for course ID {course_id}, term {term} <<<\n"
         )
         return data
+=======
+    def get_complementary_details(
+        self, course_id, effdt, subject, catalog_nbr, typ_offr
+    ):
+        complementary_url = os.getenv("COMPLEMENTARY_COURSE_LINK").format(
+            course_id=course_id,
+            effdt=effdt,
+            crse_offer_nbr="1",
+            subject=subject,
+            catalog_nbr=catalog_nbr,
+            typ_offr=typ_offr,
+        )
+        return self.get_json_from_page(complementary_url)
+>>>>>>> a4f1fcb (Revert "update scraping for new columns")
