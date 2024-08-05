@@ -14,9 +14,11 @@ from sqlalchemy.orm import sessionmaker
 
 import login
 import user_profile
+from login import Browser
 from models import Course, Section, SessionLocal, clear_database
 from process import process_course, process_major
 from scraper import Scraper
+from user_profile import create_driver
 
 load_dotenv()
 
@@ -202,7 +204,7 @@ def test_cascs(scraper, db):
             )
 
 
-def main():
+def main_multi():
     db_url = os.getenv("DB_URL")
     driver = None
 
@@ -227,7 +229,7 @@ def main():
         major_codes = [major["subject"] for major in majors["subjects"]]
         logging.info(f"First few major codes: {major_codes[:5]}")
 
-        num_processes = 4
+        num_processes = 2
         logging.info(f"Setting up {num_processes} processes")
 
         chunk_size = len(major_codes) // num_processes
@@ -245,7 +247,12 @@ def main():
         with multiprocessing.Pool(processes=num_processes) as pool:
             process_chunk = partial(process_major_chunk, db_url=db_url)
             try:
-                pool.map(process_chunk, major_chunks)
+                for i, chunk in enumerate(major_chunks):
+                    pool.apply_async(process_chunk, (chunk,))
+                    logging.info(f"Started process {i+1}")
+                    time.sleep(5)
+                pool.close()
+                pool.join()
             except Exception as e:
                 logging.error(f"Error in pool.map: {str(e)}")
                 logging.exception("Exception details:")
@@ -291,6 +298,83 @@ def main_subset():
     except Exception as e:
         logging.error(f"Error in main_subset: {str(e)}")
     finally:
+        if db:
+            db.close()
+        if driver:
+            driver.quit()
+
+
+def main():
+    db_url = os.getenv("DB_URL")
+    driver = None
+
+    try:
+        logging.info("Creating initial driver...")
+        driver = user_profile.create_driver()
+        logging.info("Creating browser...")
+        browser = login.Browser(driver)
+        logging.info("Creating scraper...")
+        scraper = Scraper(browser)
+
+        logging.info("Attempting to retrieve majors...")
+        majors = scraper.get_all_majors()
+
+        if not majors or "subjects" not in majors:
+            logging.error("Failed to retrieve majors or unexpected data structure")
+            logging.debug(f"Majors data: {majors}")
+            return
+
+        logging.info(f"Retrieved {len(majors['subjects'])} majors")
+
+        major_codes = [major["subject"] for major in majors["subjects"]]
+        logging.info(f"First few major codes: {major_codes[:5]}")
+
+        engine = create_engine(db_url)
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        db = SessionLocal()
+
+        total_courses = 0
+        total_sections = 0
+
+        for major_code in major_codes:
+            try:
+                logging.info(f"Starting to process major: {major_code}")
+                print(f"About to get courses for major: {major_code}")
+                courses = scraper.get_courses_from_major(major_code)["courses"]
+                logging.info(f"Found {len(courses)} courses for {major_code}")
+
+                for course_data in courses:
+                    try:
+                        course, sections = process_course(
+                            course_data, db, major_code, scraper
+                        )
+                        total_courses += 1
+                        total_sections += len(sections)
+                        logging.info(
+                            f"Processed course {course.course_number} with {len(sections)} sections"
+                        )
+                        print(
+                            f"Finished processing all courses for major: {major_code}"
+                        )
+                    except Exception as e:
+                        logging.error(
+                            f"Error processing course {course_data.get('catalog_nbr')}: {str(e)}"
+                        )
+
+                logging.info(f"Finished processing major: {major_code}")
+            except Exception as e:
+                logging.error(f"Error processing major {major_code}: {str(e)}")
+                logging.exception("Exception details:")
+
+        logging.info(
+            f"Total processed: {total_courses} courses and {total_sections} sections"
+        )
+
+    except Exception as e:
+        logging.error(f"Error in main: {str(e)}")
+        logging.exception("Exception details:")
+    finally:
+        logging.info("Closing database connection and driver...")
         if db:
             db.close()
         if driver:

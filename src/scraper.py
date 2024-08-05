@@ -8,11 +8,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from login import Browser
 
-
-def save_json_to_file(data, filename):
-    os.makedirs("json", exist_ok=True)
-    with open(os.path.join("json", filename), "w") as f:
-        json.dump(data, f, indent=2)
+# def save_json_to_file(data, filename):
+#     os.makedirs("json", exist_ok=True)
+#     full_path = os.path.join("json", filename)
+#     print(f"Attempting to save JSON to: {os.path.abspath(full_path)}")
+#     with open(os.path.join("json", filename), "w") as f:
+#         json.dump(data, f, indent=2)
 
 
 class Scraper:
@@ -63,17 +64,20 @@ class Scraper:
             print("didn't need login")
 
     def get_json_from_page(self, url):
+        print(f"Accessing URL: {url}")
         self.openpage(url)
         json_wrap = self.browser.browser.find_element(By.TAG_NAME, "pre").text
         return json.loads(json_wrap)
 
     def get_all_majors(self):
+        catalog_url = os.getenv("CATALOG")
+        print(f"Fetching all majors from: {catalog_url}")
         return self.get_json_from_page(os.getenv("CATALOG"))
 
     def get_courses_from_major(self, major):
         courses_url = os.getenv("COURSES_IN_MAJOR").format(major=major)
+        print(f"Fetching courses for major {major} from: {courses_url}")
         data = self.get_json_from_page(courses_url)
-        save_json_to_file(data, f"{major}_courses.json")
         return data
 
     def get_complementary_details(
@@ -87,11 +91,18 @@ class Scraper:
             catalog_nbr=catalog_nbr.strip(),
             typ_offr=typ_offr.strip(),
         )
+        print(
+            f"\n>>> Entering get_complementary_details for {subject} {catalog_nbr} <<<"
+        )
+        print(
+            f"Fetching complementary details for {subject} {catalog_nbr} from: {complementary_url}"
+        )
         print(f"Complementary URL: {complementary_url}")
         if not complementary_url:
             raise ValueError("Complementary URL is not formed correctly.")
 
         data = self.get_json_from_page(complementary_url)
+        print(f"Complementary details fetched successfully for {subject} {catalog_nbr}")
 
         course_details = data.get("course_details", {})
 
@@ -107,11 +118,26 @@ class Scraper:
         data["processed_hub_attributes"] = hub_attributes
         data["processed_units"] = units
 
+        print(
+            f">>> Exiting get_complementary_details for {subject} {catalog_nbr} <<<\n"
+        )
         return data
 
     def get_course_details(self, course_id, term, crse_offer_nbr):
+        print(
+            f"\n>>> Entering get_course_details for course ID {course_id}, term {term} <<<"
+        )
         course_url = os.getenv("COURSE_LINK").format(
             course_id=course_id, term=term, crse_offer_nbr=crse_offer_nbr
         )
+        print(
+            f"Fetching course details for course ID {course_id}, term {term} from: {course_url}"
+        )
         data = self.get_json_from_page(course_url)
+        print(
+            f"Course details fetched successfully for course ID {course_id}, term {term}"
+        )
+        print(
+            f">>> Exiting get_course_details for course ID {course_id}, term {term} <<<\n"
+        )
         return data
